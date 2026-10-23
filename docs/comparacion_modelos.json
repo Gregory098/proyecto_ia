@@ -1,0 +1,38 @@
+{
+  "fecha": "2026-10-23",
+  "caso_de_prueba": "Trabajo hace 3 años en una empresa y mi jefe me grita frente a mis compañeros. Ayer me dijeron que me despedirán.",
+  "resultados": [
+    {
+      "modelo_pedido": "gemini-3.1-flash-lite",
+      "modelo_atendido": "gemini-3.1-flash-lite",
+      "intentos": 5,
+      "respuestas_validas": 4,
+      "latencia_promedio_s": 9.096147,
+      "tokens_entrada_promedio": 345.0,
+      "tokens_salida_promedio": 197.5,
+      "costo_promedio_usd": 0.000383,
+      "precios_usados": {
+        "entrada_usd_por_millon": 0.25,
+        "salida_usd_por_millon": 1.5,
+        "fuente": "https://ai.google.dev/gemini-api/docs/pricing",
+        "fecha_consulta": "2026-10-23"
+      }
+    },
+    {
+      "modelo_pedido": "gemini-3.5-flash-lite",
+      "modelo_atendido": "gemini-3.5-flash-lite",
+      "intentos": 5,
+      "respuestas_validas": 5,
+      "latencia_promedio_s": 2.274434,
+      "tokens_entrada_promedio": 345.0,
+      "tokens_salida_promedio": 191.0,
+      "costo_promedio_usd": 0.000581,
+      "precios_usados": {
+        "entrada_usd_por_millon": 0.3,
+        "salida_usd_por_millon": 2.5,
+        "fuente": "https://ai.google.dev/gemini-api/docs/pricing",
+        "fecha_consulta": "2026-10-23"
+      }
+    }
+  ]
+}

@@ -93,16 +93,18 @@ python src/triage_lex.py "Me despidieron sin carta de aviso y no me pagaron el f
 python -m unittest discover -s tests
 ```
 
-Son 13 pruebas que **no consumen la API**: simulan sus respuestas y verifican la
+Son 19 pruebas que **no consumen la API**: simulan sus respuestas y verifican la
 entrada vacía, llave ausente, errores 401 y 429, timeout, caída de conexión,
 respuesta que no es JSON, campos faltantes y materia no reconocida.
 
 ## Estructura del repositorio
 
 ```
-src/triage_lex.py          Módulo principal (armar, enviar, extraer y validar)
-tests/test_triage_lex.py   Pruebas unitarias
-docs/                      Evidencias de ejecución y de pruebas
+src/triage_lex.py          Módulo principal (armar, enviar, extraer, validar, costo)
+tests/test_triage_lex.py   Pruebas unitarias (sin consumir la API)
+prompts/                   Banco de prompts, prueba de consistencia y su registro
+scripts/comparar_modelos.py  Compara dos modelos (latencia, tokens, costo)
+docs/                      Diagrama, decisión de arquitectura y evidencias
 .env.example               Variables de entorno necesarias (sin valores reales)
 requirements.txt           Dependencias con versiones fijas
 ```
@@ -118,6 +120,13 @@ requirements.txt           Dependencias con versiones fijas
   plazos, ni repetir datos personales sensibles.
 - **Secretos fuera del código**: la llave vive en `.env`, excluido por `.gitignore`.
 
+## Banco de prompts y comparación de modelos
+
+```bash
+python prompts/test_consistencia.py          # 3 repeticiones por prompt
+python scripts/comparar_modelos.py MODELO_A MODELO_B 5
+```
+
 ## Límites conocidos
 
 - Es una orientación **provisoria**; no constituye asesoría jurídica.
@@ -126,11 +135,18 @@ requirements.txt           Dependencias con versiones fijas
   de privacidad.
 - La clasificación depende del modelo elegido y puede variar entre ejecuciones.
 
-## Próximos pasos (módulos siguientes)
+## Evidencias del Gate 1
 
-- Cliente modular con reintentos y registro de costo.
-- Recuperación de normativa propia (RAG) para fundamentar y citar fuentes.
-- API con FastAPI y contenedor Docker.
-- Captura de datos y documentos del caso, y derivación al especialista, tanto para
-  personas como para empresas (remuneraciones, laboral, reclutamiento y procesos
-  administrativos).
+- Diagrama de arquitectura: `docs/arquitectura.png`
+- Decisión de modelo con datos reales: `docs/decision-arquitectura.md`
+- Banco de prompts y registro de consistencia: `prompts/`
+- Registro de ensayo de instalación limpia: `docs/ensayo_instalacion_limpia.md`
+
+## Próximos pasos
+
+Cliente modular con reintentos y registro de costo, recuperación de normativa (RAG),
+API con FastAPI y contenedor Docker.
+
+## Derechos
+
+Entrega académica. Todos los derechos reservados (ver `NOTICE.md`).

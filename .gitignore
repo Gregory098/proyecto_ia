@@ -19,3 +19,6 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Material privado (no se sube)
+privado/

@@ -1,0 +1,22 @@
+digraph G {
+  rankdir=LR; fontname="Helvetica"; node [fontname="Helvetica", shape=box, style="rounded,filled", fillcolor="#eef3fb", color="#4a6fa5"]; edge [fontname="Helvetica", fontsize=10];
+  usuario [label="Usuario\n(relato del caso)", fillcolor="#fff4d6", color="#c9a227"];
+  env [label=".env\nGEMINI_API_KEY\nGEMINI_MODEL\n(fuera de Git)", fillcolor="#fde2e2", color="#c0392b"];
+  subgraph cluster_mod { label="src/triage_lex.py"; style="rounded"; color="#4a6fa5";
+    armar [label="armar_peticion()\nvalida entrada\nURL + headers + body\nPROMPT_SISTEMA aparte"];
+    enviar [label="enviar_peticion()\nrequests.post (timeout 30 s)\n401/403 · 404 · 429 · 5xx"];
+    extraer [label="extraer_texto()\ncandidates[0] → text"];
+    validar [label="validar_triage()\nparsear_respuesta_json()\ncampos + materia + urgencia"];
+    costo [label="calcular_costo()\nusageMetadata × precio", fillcolor="#e3f4e1", color="#2e8b57"];
+  }
+  api [label="API Gemini\n:generateContent", shape=box3d, fillcolor="#e8e0f5", color="#6a4c93"];
+  errores [label="Errores → RuntimeError\ncon mensaje claro\n(el programa no se cae)", fillcolor="#fde2e2", color="#c0392b"];
+  salida [label="Salida: JSON validado\nmateria · urgencia · resumen\norientación · advertencia", fillcolor="#fff4d6", color="#c9a227"];
+  usuario -> armar [label="texto"];
+  env -> armar [label="credencial y modelo", style=dashed, color="#c0392b"];
+  armar -> enviar [label="url, headers, body"];
+  enviar -> api [label="HTTPS"]; api -> enviar [label="JSON + usageMetadata"];
+  enviar -> extraer [label="datos"]; extraer -> validar [label="texto"]; validar -> salida;
+  enviar -> costo [label="datos", style=dashed]; 
+  enviar -> errores [style=dotted, color="#c0392b"]; validar -> errores [style=dotted, color="#c0392b"];
+}

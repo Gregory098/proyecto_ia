@@ -1,0 +1,4 @@
+{
+  "gemini-3.1-flash-lite": {"entrada_usd_por_millon": 0.25, "salida_usd_por_millon": 1.50, "fuente": "https://ai.google.dev/gemini-api/docs/pricing", "fecha_consulta": "2026-10-23"},
+  "gemini-3.5-flash-lite": {"entrada_usd_por_millon": 0.30, "salida_usd_por_millon": 2.50, "fuente": "https://ai.google.dev/gemini-api/docs/pricing", "fecha_consulta": "2026-10-23"}
+}
