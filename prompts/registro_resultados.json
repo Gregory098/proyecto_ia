@@ -1,0 +1,28 @@
+{
+  "fecha": "2026-10-23T02:10:35",
+  "modelo": "gemini-flash-lite-latest",
+  "repeticiones_por_prompt": 3,
+  "resultados": [
+    {
+      "prompt": "clasificar_caso",
+      "validos": 3,
+      "total": 3,
+      "consistencia": 1.0,
+      "fallos": []
+    },
+    {
+      "prompt": "extraer_datos",
+      "validos": 3,
+      "total": 3,
+      "consistencia": 1.0,
+      "fallos": []
+    },
+    {
+      "prompt": "resumir_caso",
+      "validos": 3,
+      "total": 3,
+      "consistencia": 1.0,
+      "fallos": []
+    }
+  ]
+}
