@@ -7,6 +7,7 @@ abogado, solo ordena el caso para que el especialista adecuado lo tome.
 """
 import json
 import os
+import re
 import sys
 
 import requests
@@ -41,13 +42,17 @@ Reglas:
 """
 
 
-def armar_peticion(relato):
-    """Valida la entrada y construye la URL, los headers y el cuerpo de la petición."""
+def armar_peticion(relato, system_instruction=PROMPT_SISTEMA, response_schema=None, modelo=None):
+    """Valida la entrada y construye la URL, los headers y el cuerpo de la petición.
+
+    El prompt de sistema viaja en un canal separado ("systemInstruction"), nunca
+    mezclado con el texto del usuario. `modelo` permite comparar modelos sin tocar el .env.
+    """
     if not relato or not relato.strip():
         raise ValueError("El relato del caso no puede estar vacío.")
 
     api_key = os.getenv("GEMINI_API_KEY")
-    modelo = os.getenv("GEMINI_MODEL")
+    modelo = modelo or os.getenv("GEMINI_MODEL")
     if not api_key or api_key == "tu_llave_aqui":
         raise RuntimeError("Falta GEMINI_API_KEY: revisa tu archivo .env.")
     if not modelo:
@@ -56,10 +61,13 @@ def armar_peticion(relato):
     modelo = modelo.removeprefix("models/")
     url = f"{BASE_URL}/{modelo}:generateContent"
     headers = {"x-goog-api-key": api_key, "Content-Type": "application/json"}
+    config = {"temperature": 0.2, "responseMimeType": "application/json"}
+    if response_schema:
+        config["responseSchema"] = response_schema
     body = {
-        "systemInstruction": {"parts": [{"text": PROMPT_SISTEMA}]},
+        "systemInstruction": {"parts": [{"text": system_instruction}]},
         "contents": [{"role": "user", "parts": [{"text": relato.strip()}]}],
-        "generationConfig": {"temperature": 0.2, "responseMimeType": "application/json"},
+        "generationConfig": config,
     }
     return url, headers, body
 
@@ -99,15 +107,34 @@ def extraer_texto(datos):
         raise RuntimeError("La respuesta no trae texto generado (posible bloqueo o formato inesperado).")
 
 
-def validar_triage(texto):
-    """Convierte el texto del modelo en un diccionario y valida su estructura."""
+def calcular_costo(datos, precio_entrada, precio_salida):
+    """Costo en USD de una petición: tokens de entrada x precio + tokens de salida x precio.
+
+    Los precios se reciben como parámetros (USD por token) porque cambian con el tiempo.
+    """
     try:
-        triage = json.loads(texto)
+        uso = datos["usageMetadata"]
+        return uso["promptTokenCount"] * precio_entrada + uso["candidatesTokenCount"] * precio_salida
+    except (KeyError, TypeError):
+        raise RuntimeError("La respuesta no trae 'usageMetadata' para calcular el costo.")
+
+
+def parsear_respuesta_json(texto):
+    """Limpia posibles marcas de markdown (```json) y convierte el texto en un diccionario."""
+    limpio = re.sub(r"^\s*```(?:json)?\s*", "", texto.strip())
+    limpio = re.sub(r"\s*```\s*$", "", limpio)
+    try:
+        datos = json.loads(limpio)
     except json.JSONDecodeError:
         raise RuntimeError("El modelo no devolvió un JSON válido.")
-
-    if not isinstance(triage, dict):
+    if not isinstance(datos, dict):
         raise RuntimeError("El JSON del modelo no tiene la estructura esperada.")
+    return datos
+
+
+def validar_triage(texto):
+    """Convierte el texto del modelo en un diccionario y valida su estructura."""
+    triage = parsear_respuesta_json(texto)
     faltantes = [campo for campo in CAMPOS_ESPERADOS if campo not in triage]
     if faltantes:
         raise RuntimeError(f"Al JSON del modelo le faltan campos: {', '.join(faltantes)}.")

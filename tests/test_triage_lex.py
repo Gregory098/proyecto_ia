@@ -104,6 +104,34 @@ class PruebasTriage(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "texto generado"):
                 triage_lex.clasificar_caso("hola")
 
+    def test_prompt_de_sistema_va_separado(self):
+        _, _, body = triage_lex.armar_peticion("Mi jefe me acosa")
+        self.assertEqual(body["systemInstruction"]["parts"][0]["text"], triage_lex.PROMPT_SISTEMA)
+        self.assertEqual(body["contents"][0]["parts"][0]["text"], "Mi jefe me acosa")
+
+    def test_esquema_opcional(self):
+        esquema = {"type": "OBJECT", "properties": {"a": {"type": "STRING"}}}
+        _, _, body = triage_lex.armar_peticion("hola", "otro prompt", esquema)
+        self.assertEqual(body["generationConfig"]["responseSchema"], esquema)
+        self.assertEqual(body["systemInstruction"]["parts"][0]["text"], "otro prompt")
+
+    def test_modelo_por_parametro(self):
+        url, _, _ = triage_lex.armar_peticion("hola", modelo="otro-modelo")
+        self.assertTrue(url.endswith("/models/otro-modelo:generateContent"))
+
+    def test_json_envuelto_en_markdown(self):
+        envuelto = "```json\n" + json.dumps(TRIAGE_OK) + "\n```"
+        self.assertEqual(triage_lex.parsear_respuesta_json(envuelto), TRIAGE_OK)
+        self.assertEqual(triage_lex.parsear_respuesta_json("```\n{\"a\": 1}\n```"), {"a": 1})
+
+    def test_calculo_de_costo(self):
+        datos = {"usageMetadata": {"promptTokenCount": 850, "candidatesTokenCount": 320}}
+        self.assertAlmostEqual(triage_lex.calcular_costo(datos, 0.000001, 0.000004), 0.00213)
+
+    def test_costo_sin_metadata(self):
+        with self.assertRaises(RuntimeError):
+            triage_lex.calcular_costo({}, 0.1, 0.1)
+
 
 if __name__ == "__main__":
     unittest.main()
